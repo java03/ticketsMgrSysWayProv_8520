@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+"-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ticketsMgrSysWayProv_8520.mapper.RouteInfoMapper">
+
+	<resultMap type="Station" id="startStationMap">
+		<id column="start_id" property="stationId"/>
+		<result column="start_name" property="stationName"/>
+		<result column="start_code" property="stationCode"/>
+	</resultMap>
+	<resultMap type="Station" id="terminalStationMap">
+		<id column="terminal_id" property="stationId"/>
+		<result column="terminal_name" property="stationName"/>
+		<result column="terminal_code" property="stationCode"/>
+	</resultMap>
+	<resultMap type="RouteInfo" id="routeMap">
+		<id column="route_id" property="routeId"/>
+		<result column="route_name" property="routeName"/>
+		<result column="price" property="price"/>
+		<association property="startStation" resultMap="startStationMap"></association>
+		<association property="terminalStation" resultMap="terminalStationMap"></association>
+	</resultMap>
+	<select id="getRoutes" resultMap="routeMap" parameterType="map">
+	     select r.route_id,r.route_name,r.price,
+	     s1.station_id start_id,s1.station_name start_name,
+	     s2.station_id terminal_id, s2.station_name terminal_name
+		 from route_info r,station s1,station s2 
+		 where r.start_station=s1.station_id and r.terminal_station=s2.station_id and r.del_mark=0
+		 order by r.route_id
+	</select>
+	<select id="getRouteById" resultMap="routeMap" parameterType="_int">
+		select r.route_id,r.route_name,r.price,
+	     s1.station_id start_id,s1.station_name start_name,s1.station_code start_code,
+	     s2.station_id terminal_id, s2.station_name terminal_name,s2.station_code terminal_code
+		 from route_info r,station s1,station s2 
+		 where r.start_station=s1.station_id and r.terminal_station=s2.station_id and r.del_mark=0
+		 and route_id=#{routeId}
+	</select>
+	<insert id="addRoute" parameterType="RouteInfo">
+		<selectKey order="BEFORE" keyProperty="routeId" resultType="_int">
+			select SQ_route_id.nextval from dual
+		</selectKey>
+		insert into route_info(route_Id,start_station,terminal_station,route_name,price)
+		values(#{routeId}, #{startStation.stationId}, #{terminalStation.stationId}, #{routeName}, #{price})
+	</insert>
+	<update id="modifyRoute" parameterType="RouteInfo">
+		update route_info
+		 set route_name=#{routeName},
+		 start_station=#{startStation.stationId},
+		 terminal_station=#{terminalStation.stationId},
+		 price=#{price}
+		where route_id=#{routeId}
+	</update>
+	<update id="removeRouteById" parameterType="_int">
+		update route_info set del_mark=1 where route_id=#{routeId}
+	</update>
+</mapper>

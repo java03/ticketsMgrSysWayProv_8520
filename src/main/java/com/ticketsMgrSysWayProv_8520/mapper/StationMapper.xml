@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+"-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ticketsMgrSysWayProv_8520.mapper.StationMapper">
+	<resultMap type="Station" id="stationMap">
+		<id column="station_id" property="stationId"/>
+		<result column="station_code" property="stationCode"/>
+		<result column="station_name" property="stationName"/>
+		<result column="distance" property="distance"/>
+	</resultMap>
+	
+	<select id="getStations" resultMap="stationMap" >
+		select station_id,station_code,station_name,distance 
+		from station
+		where del_mark=0
+		order by station_id
+	</select>
+	<select id="getStationById" resultMap="stationMap" parameterType="_int">
+		select station_id,station_code,station_name,distance 
+		from station
+		where del_mark=0  and station_id=#{stationId}
+				
+	</select>
+	<insert id="addStation" parameterType="Station">
+		<selectKey order="BEFORE" keyProperty="stationId" resultType="_int">
+			select SQ_station_id.nextval from dual
+		</selectKey>
+		insert into station(station_id,station_code,station_name,distance)
+		values(#{stationId}, #{stationCode}, #{stationName}, #{distance})
+	</insert>
+	<update id="modifyStation" parameterType="Station">
+		update station
+		 set station_code=#{stationCode},
+		 station_name=#{stationName},
+		 distance=#{distance}
+		where station_id=#{stationId}
+	</update>
+	<update id="removeStation" parameterType="_int">
+		update station set del_mark=1 where station_id=#{stationId}
+	</update>
+</mapper>
